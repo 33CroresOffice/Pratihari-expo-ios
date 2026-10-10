@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Download Testing Plan — Excel</title>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:white;border-radius:16px;padding:40px 48px;max-width:540px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.10);text-align:center;}
+.icon{font-size:48px;margin-bottom:16px;}
+h1{font-size:22px;color:#1a3a5c;margin-bottom:6px;}
+p{color:#6c757d;font-size:14px;line-height:1.6;margin-bottom:24px;}
+.meta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;}
+.chip{background:#e9ecef;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;color:#495057;}
+.btn{display:inline-flex;align-items:center;gap:10px;background:#1d6f42;color:white;border:none;border-radius:10px;padding:13px 32px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;text-decoration:none;}
+.btn:hover{background:#155734;}
+.btn:disabled{background:#adb5bd;cursor:not-allowed;}
+.btn-secondary{background:white;color:#1a3a5c;border:2px solid #1a3a5c;}
+.btn-secondary:hover{background:#f0f4f8;}
+.status{margin-top:14px;font-size:13px;color:#6c757d;min-height:20px;}
+.checkbox-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;font-size:13px;color:#495057;}
+.checkbox-row input{width:18px;height:18px;cursor:pointer;}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.live-stats{background:#f8f9fa;border:1px solid #e9ecef;border-radius:10px;padding:16px;margin-bottom:24px;text-align:left;}
+.live-stats h3{font-size:13px;color:#1a3a5c;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.live-stat{text-align:center;}
+.live-stat .num{font-size:22px;font-weight:700;color:#1a3a5c;}
+.live-stat .lbl{font-size:10px;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;}
+.login-box{display:none;}
+.login-box label{display:block;font-size:12px;font-weight:600;color:#495057;text-align:left;margin:12px 0 5px;}
+.login-box input{width:100%;padding:11px 13px;border:1.5px solid #ced4da;border-radius:8px;font-size:14px;outline:none;}
+.login-box input:focus{border-color:#1a3a5c;}
+.login-box .btn{width:100%;margin-top:18px;justify-content:center;}
+.login-error{background:#fdecea;color:#b02a37;font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:8px;display:none;}
+.login-hint{font-size:11px;color:#6c757d;text-align:center;margin-top:16px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="card login-box" id="loginBox">
+  <div class="icon">&#128274;</div>
+  <h1>Dev Team Access</h1>
+  <p>Sign in with a Pratihari Nijog dev team account to download the testing plan workbook.</p>
+  <div class="login-error" id="loginError"></div>
+  <label>Work Email</label>
+  <input type="email" id="loginEmail" placeholder="you@pratihari.in" autocomplete="username">
+  <label>Password</label>
+  <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+  <button class="btn" id="loginBtn" onclick="handleSignIn()">Sign In</button>
+  <p class="login-hint">Test data loads only after sign-in. Access is restricted to dev team accounts.</p>
+</div>
+
+<!-- DOWNLOAD CARD -->
+<div class="card" id="dlCard" style="display:none">
+  <div class="icon">&#128202;</div>
+  <h1>Pratihari Nijog — Testing Plan</h1>
+  <p>Download the complete Testing Plan &amp; Requirements Traceability Matrix as a multi-sheet Excel workbook.</p>
+  <div class="meta" id="metaChips">
+    <span class="chip" id="chipCases">… Test Cases</span>
+    <span class="chip" id="chipModules">… Modules</span>
+    <span class="chip">7 Sheets</span>
+    <span class="chip">v2.0 &middot; Oct 2026</span>
+  </div>
+
+  <div class="live-stats" id="liveStats">
+    <h3>Current Progress (from shared database)</h3>
+    <div class="live-stats-grid" id="liveStatsGrid">
+      <div class="live-stat"><div class="num" id="lsPass">0</div><div class="lbl">Pass</div></div>
+      <div class="live-stat"><div class="num" id="lsFail">0</div><div class="lbl">Fail</div></div>
+      <div class="live-stat"><div class="num" id="lsPending">0</div><div class="lbl">Pending</div></div>
+    </div>
+  </div>
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="includeProgress" checked>
+    <label for="includeProgress">Include current testing progress from database</label>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" id="dlBtn" onclick="generate()">
+      <span>&#11015;</span> Download Excel (.xlsx)
+    </button>
+    <button class="btn btn-secondary" onclick="window.location.href='testing-plan.html'">
+      <span>&#8592;</span> Back to Interactive Plan
+    </button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+
+var SUPABASE_URL = 'https://zqmuniemheltatarumbp.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbXVuaWVtaGVsdGF0YXJ1bWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTg4NDIsImV4cCI6MjA5MjI3NDg0Mn0.W-6bEQvSJnhMDYr9mDBAHmF5pf_p9BcVaGnZ-mRWPzs';
+var db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+var STATUSES = ['PENDING', 'PASS', 'FAIL', 'BLOCKED', 'SKIPPED'];
+var currentUser = null;
+var MODULES = [];
+var TC = [];
+var results = {};
+
+function getStatus(id){ return (results[id] && results[id].status) || 'PENDING'; }
+
+async function isAdmin(userId){
+  try{
+    var r = await db.from('pratihari_admins').select('user_id').eq('user_id', userId).maybeSingle();
+    return !!r.data;
+  }catch(e){ return false; }
+}
+
+function showLogin(on){
+  document.getElementById('loginBox').style.display = on ? '' : 'none';
+  document.getElementById('dlCard').style.display = on ? 'none' : '';
+}
+
+async function handleSignIn(){
+  var errEl = document.getElementById('loginError');
+  var btn = document.getElementById('loginBtn');
+  errEl.style.display = 'none';
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
+  if(!email || !password){ errEl.textContent = 'Enter your work email and password.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try{
+    var r = await db.auth.signInWithPassword({ email: email, password: password });
+    if(r.error) throw r.error;
+    if(!(await isAdmin(r.data.user.id))){
+      await db.auth.signOut();
+      throw new Error('This account is not on the dev team. Access denied.');
+    }
+    currentUser = r.data.user;
+    await loadData();
+  }catch(e){
+    errEl.textContent = e.message || 'Sign-in failed.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+async function loadData(){
+  try{
+    var mods = await db.from('test_modules').select('code,name,scope');
+    if(mods.error) throw mods.error;
+    MODULES = mods.data || [];
+
+    var cases = await db.from('test_cases').select('test_case_id,module_code,title,priority,description,feature,sort_order').order('sort_order');
+    if(cases.error) throw cases.error;
+    TC = (cases.data || []).map(function(c){ return [c.test_case_id, c.module_code, c.title, c.priority, c.description, c.feature]; });
+
+    var firstSeen = {};
+    TC.forEach(function(tc){ if(!(tc[1] in firstSeen)) firstSeen[tc[1]] = Object.keys(firstSeen).length; });
+    MODULES.sort(function(a,b){ return (firstSeen[a.code] != null ? firstSeen[a.code] : 999) - (firstSeen[b.code] != null ? firstSeen[b.code] : 999); });
+
+    var res = await db.from('test_case_results').select('test_case_id,status,notes,test_date,updated_by_email');
+    if(res.error) throw res.error;
+    results = {};
+    (res.data || []).forEach(function(r){
+      results[r.test_case_id] = { status: r.status, notes: r.notes || '', test_date: r.test_date || '', updated_by_email: r.updated_by_email || '' };
+    });
+
+    document.getElementById('chipCases').textContent = TC.length + ' Test Cases';
+    document.getElementById('chipModules').textContent = MODULES.length + ' Modules';
+    updateLiveStats();
+    showLogin(false);
+    setTimeout(generate, 600);
+  }catch(e){
+    document.getElementById('loginError').textContent = 'Could not load test data: ' + (e.message || 'unknown error');
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function updateLiveStats(){
+  var pass=0, fail=0, pending=0;
+  TC.forEach(function(tc){
+    var s = getStatus(tc[0]);
+    if(s === 'PASS') pass++;
+    else if(s === 'FAIL') fail++;
+    else if(s !== 'BLOCKED' && s !== 'SKIPPED') pending++;
+  });
+  document.getElementById('lsPass').textContent = pass;
+  document.getElementById('lsFail').textContent = fail;
+  document.getElementById('lsPending').textContent = pending;
+}
+
+// ═════════════════════════════════════════════
+//  EXCEL GENERATION
+// ═════════════════════════════════════════════
+function styleHeaderRow(ws,ncols,rowIdx,fillRGB){
+  rowIdx = rowIdx || 0;
+  for(var C=0;C<ncols;C++){
+    var addr = XLSX.utils.encode_cell({r:rowIdx,c:C});
+    if(!ws[addr]) continue;
+    ws[addr].s = {font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:fillRGB}},alignment:{horizontal:'center',wrapText:true}};
+  }
+}
+
+function generate(){
+  var btn = document.getElementById('dlBtn');
+  var status = document.getElementById('status');
+  btn.disabled = true;
+  status.textContent = 'Generating workbook...';
+  var includeProgress = document.getElementById('includeProgress').checked;
+
+  setTimeout(function(){
+    try{
+      var wb = XLSX.utils.book_new();
+
+      var header = ['Test ID','Module Code','Module Name','Test Case Title','Priority','Status','Description','Tested By','Test Date','Notes/Bug ID'];
+      var rows = [header];
+      TC.forEach(function(tc){
+        var id = tc[0];
+        var res = results[id] || {};
+        var s = includeProgress ? getStatus(id) : 'PENDING';
+        var tester = includeProgress ? (res.updated_by_email || '') : '';
+        var date = includeProgress ? (res.test_date || '') : '';
+        var notes = includeProgress ? (res.notes || '') : '';
+        var modName = '';
+        MODULES.forEach(function(m){ if(m.code === tc[1]) modName = m.name; });
+        rows.push([id, tc[1], modName, tc[2], tc[3], s, tc[4], tester, date, notes]);
+      });
+
+      // Sheet 1: Test Cases
+      var ws1 = XLSX.utils.aoa_to_sheet(rows);
+      ws1['!cols'] = [{wch:20},{wch:14},{wch:34},{wch:46},{wch:10},{wch:12},{wch:80},{wch:24},{wch:14},{wch:30}];
+      ws1['!freeze'] = {xSplit:0,ySplit:1};
+      styleHeaderRow(ws1,10,0,'1A3A5C');
+      for(var R=1;R<rows.length;R++){
+        var st = rows[R][5];
+        var fillRGB = null;
+        if(st === 'PASS') fillRGB = 'D1E7DD';
+        else if(st === 'FAIL') fillRGB = 'F8D7DA';
+        else if(st === 'BLOCKED') fillRGB = 'FFF3CD';
+        else if(st === 'SKIPPED') fillRGB = 'E2E3E5';
+        if(fillRGB){
+          for(var C=0;C<10;C++){
+            var addr = XLSX.utils.encode_cell({r:R,c:C});
+            if(!ws1[addr]) continue;
+            ws1[addr].s = ws1[addr].s || {};
+            ws1[addr].s.fill = {fgColor:{rgb:fillRGB}};
+          }
+        }
+      }
+      XLSX.utils.book_append_sheet(wb, ws1, 'Test Cases');
+
+      // Sheet 2: Module Summary
+      var summaryRows = [['Module Code','Module Name','Total','P1','P2','P3','Pass','Fail','Blocked','Pending','Pass Rate']];
+      var totals = {total:0,p1:0,p2:0,p3:0,pass:0,fail:0,blocked:0,pending:0};
+      MODULES.forEach(function(m){
+        var total=0,p1=0,p2=0,p3=0,pass=0,fail=0,blocked=0,pending=0;
+        TC.forEach(function(tc){
+          if(tc[1] !== m.code) return;
+          total++;
+          if(tc[3] === 'P1') p1++; else if(tc[3] === 'P2') p2++; else p3++;
+          var s = includeProgress ? getStatus(tc[0]) : 'PENDING';
+          if(s === 'PASS') pass++; else if(s === 'FAIL') fail++; else if(s === 'BLOCKED') blocked++; else if(s === 'PENDING') pending++;
+        });
+        var rate = total > 0 ? Math.round((pass/total)*100)+'%' : '0%';
+        summaryRows.push([m.code, m.name, total, p1, p2, p3, pass, fail, blocked, pending, rate]);
+        totals.total+=total; totals.p1+=p1; totals.p2+=p2; totals.p3+=p3;
+        totals.pass+=pass; totals.fail+=fail; totals.blocked+=blocked; totals.pending+=pending;
+      });
+      var overallRate = totals.total > 0 ? Math.round((totals.pass/totals.total)*100)+'%' : '0%';
+      summaryRows.push(['','TOTAL',totals.total,totals.p1,totals.p2,totals.p3,totals.pass,totals.fail,totals.blocked,totals.pending,overallRate]);
+      var ws2 = XLSX.utils.aoa_to_sheet(summaryRows);
+      ws2['!cols'] = [{wch:16},{wch:38},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:10},{wch:10}];
+      styleHeaderRow(ws2,11,0,'1A3A5C');
+      var lastR = summaryRows.length-1;
+      for(var C2=0;C2<11;C2++){
+        var a2 = XLSX.utils.encode_cell({r:lastR,c:C2});
+        if(!ws2[a2]) continue;
+        ws2[a2].s = {font:{bold:true},fill:{fgColor:{rgb:'E9ECEF'}}};
+      }
+      XLSX.utils.book_append_sheet(wb, ws2, 'Module Summary');
+
+      // Sheet 3: P1 Critical
+      var p1Rows = TC.filter(function(tc){ return tc[3] === 'P1'; }).map(function(tc){
+        var res = results[tc[0]] || {};
+        return [tc[0], tc[1], tc[2], includeProgress ? getStatus(tc[0]) : 'PENDING',
+                includeProgress ? (res.updated_by_email || '') : '',
+                includeProgress ? (res.test_date || '') : '',
+                includeProgress ? (res.notes || '') : ''];
+      });
+      var ws3 = XLSX.utils.aoa_to_sheet([['Test ID','Module Code','Test Case Title','Status','Tested By','Test Date','Notes/Bug ID']].concat(p1Rows));
+      ws3['!cols'] = [{wch:20},{wch:14},{wch:46},{wch:12},{wch:24},{wch:14},{wch:30}];
+      styleHeaderRow(ws3,7,0,'856404');
+      XLSX.utils.book_append_sheet(wb, ws3, 'P1 Critical ('+p1Rows.length+')');
+
+      // Sheet 4: RTM
+      var rtmRows = TC.map(function(tc){
+        return [tc[0], tc[1], tc[5], tc[2], tc[3], includeProgress ? getStatus(tc[0]) : 'PENDING'];
+      });
+      var ws4 = XLSX.utils.aoa_to_sheet([['Test ID','Module','Feature','Test Title','Priority','Status']].concat(rtmRows));
+      ws4['!cols'] = [{wch:20},{wch:14},{wch:36},{wch:46},{wch:10},{wch:12}];
+      styleHeaderRow(ws4,6,0,'1A3A5C');
+      XLSX.utils.book_append_sheet(wb, ws4, 'RTM');
+
+      // Sheet 5: Failed Tests
+      var failedRows = TC.filter(function(tc){ return includeProgress && getStatus(tc[0]) === 'FAIL'; }).map(function(tc){
+        var res = results[tc[0]] || {};
+        var modName = '';
+        MODULES.forEach(function(m){ if(m.code === tc[1]) modName = m.name; });
+        return [tc[0], tc[1], modName, tc[2], tc[3], res.updated_by_email || '', res.test_date || '', res.notes || ''];
+      });
+      var ws5 = XLSX.utils.aoa_to_sheet([['Test ID','Module','Module Name','Test Case','Priority','Tested By','Test Date','Notes/Bug ID']].concat(failedRows));
+      ws5['!cols'] = [{wch:20},{wch:14},{wch:34},{wch:46},{wch:10},{wch:24},{wch:14},{wch:40}];
+      styleHeaderRow(ws5,8,0,'721C24');
+      if(failedRows.length === 0){
+        XLSX.utils.sheet_add_aoa(ws5, [['No failed tests yet']], {origin:{r:1,c:0}});
+      }
+      XLSX.utils.book_append_sheet(wb, ws5, 'Failed Tests ('+failedRows.length+')');
+
+      // Sheet 6: Progress Dashboard
+      var dashRows = [['Module','Total','Pass','Fail','Blocked','Skipped','Pending','Pass Rate','Progress']];
+      var dTotals = {total:0,pass:0,fail:0,blocked:0,skipped:0,pending:0};
+      MODULES.forEach(function(m){
+        var total=0,pass=0,fail=0,blocked=0,skipped=0,pending=0;
+        TC.forEach(function(tc){
+          if(tc[1] !== m.code) return;
+          total++;
+          var s = includeProgress ? getStatus(tc[0]) : 'PENDING';
+          if(s === 'PASS') pass++; else if(s === 'FAIL') fail++; else if(s === 'BLOCKED') blocked++; else if(s === 'SKIPPED') skipped++; else pending++;
+        });
+        var rate = total > 0 ? Math.round((pass/total)*100) : 0;
+        var bar = '';
+        var filled = Math.round(rate/10);
+        for(var b=0;b<10;b++) bar += b < filled ? '#' : '-';
+        dashRows.push([m.code + ' — ' + m.name, total, pass, fail, blocked, skipped, pending, rate+'%', bar]);
+        dTotals.total+=total; dTotals.pass+=pass; dTotals.fail+=fail; dTotals.blocked+=blocked; dTotals.skipped+=skipped; dTotals.pending+=pending;
+      });
+      var dOverallRate = dTotals.total > 0 ? Math.round((dTotals.pass/dTotals.total)*100) : 0;
+      var dOverallBar = '';
+      for(var b2=0;b2<10;b2++) dOverallBar += b2 < Math.round(dOverallRate/10) ? '#' : '-';
+      dashRows.push(['TOTAL', dTotals.total, dTotals.pass, dTotals.fail, dTotals.blocked, dTotals.skipped, dTotals.pending, dOverallRate+'%', dOverallBar]);
+      var ws6 = XLSX.utils.aoa_to_sheet(dashRows);
+      ws6['!cols'] = [{wch:40},{wch:8},{wch:8},{wch:8},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12}];
+      styleHeaderRow(ws6,9,0,'1A3A5C');
+      var lastR6 = dashRows.length-1;
+      for(var C6=0;C6<9;C6++){
+        var a6 = XLSX.utils.encode_cell({r:lastR6,c:C6});
+        if(!ws6[a6]) continue;
+        ws6[a6].s = {font:{bold:true},fill:{fgColor:{rgb:'E9ECEF'}}};
+      }
+      XLSX.utils.book_append_sheet(wb, ws6, 'Progress Dashboard');
+
+      // Sheet 7: Info
+      var infoRows = [
+        ['Pratihari Nijog — Testing Plan',''],
+        ['Version','2.0 — Oct 2026'],
+        ['Total Test Cases',TC.length],
+        ['Modules',MODULES.length],
+        ['Exported By',(currentUser && currentUser.email) || '(unknown)'],
+        ['Exported On',new Date().toLocaleString()],
+        ['Include Progress',includeProgress ? 'Yes' : 'No'],
+        ['',''],
+        ['Status Legend',''],
+        ['PENDING','Not yet tested'],
+        ['PASS','Test passed successfully'],
+        ['FAIL','Test failed — see Notes column'],
+        ['BLOCKED','Cannot test — blocked by dependency'],
+        ['SKIPPED','Intentionally skipped this test cycle']
+      ];
+      var ws7 = XLSX.utils.aoa_to_sheet(infoRows);
+      ws7['!cols'] = [{wch:24},{wch:50}];
+      ws7['!merges'] = [{s:{r:0,c:0},e:{r:0,c:1}}];
+      ws7['A1'].s = {font:{bold:true,sz:14,color:{rgb:'1A3A5C'}}};
+      XLSX.utils.book_append_sheet(wb, ws7, 'Info');
+
+      var filename = 'Pratihari_Nijog_Testing_Plan_v2.0.xlsx';
+      if(includeProgress && currentUser && currentUser.email){
+        filename = 'Pratihari_Testing_Progress_' + currentUser.email.replace(/[^a-zA-Z0-9]+/g,'_') + '_' + new Date().toISOString().slice(0,10) + '.xlsx';
+      }
+      XLSX.writeFile(wb, filename);
+      status.textContent = 'Download started! Check your Downloads folder.';
+      btn.disabled = false;
+    }catch(e){
+      status.textContent = 'Error: ' + e.message;
+      btn.disabled = false;
+    }
+  }, 50);
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', function(e){ if(e.key === 'Enter') handleSignIn(); });
+document.getElementById('loginEmail').addEventListener('keydown', function(e){ if(e.key === 'Enter') handleSignIn(); });
+
+// Auto-gate on load: sign in silently if a session already exists
+(async function(){
+  var session = null;
+  try { session = (await db.auth.getSession()).data.session; } catch(e) { session = null; }
+  if(session && (await isAdmin(session.user.id))){
+    currentUser = session.user;
+    await loadData();
+  } else {
+    showLogin(true);
+  }
+})();
+</script>
+</body>
+</html>

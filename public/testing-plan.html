@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pratihari Nijog — Testing Plan & Traceability Matrix</title>
+<style>
+:root {
+--primary:#1a3a5c;--primary-light:#2d5a8e;--accent:#c8860a;
+--success:#1e7e34;--warning:#856404;--danger:#721c24;
+--neutral-50:#f8f9fa;--neutral-100:#f1f3f5;--neutral-200:#e9ecef;
+--neutral-300:#dee2e6;--neutral-400:#ced4da;--neutral-600:#6c757d;
+--neutral-700:#495057;--neutral-800:#343a40;--neutral-900:#212529;
+--p1-bg:#fff3cd;--p1-border:#ffc107;--p1-text:#664d03;
+--p2-bg:#cfe2ff;--p2-border:#0d6efd;--p2-text:#084298;
+--p3-bg:#d1e7dd;--p3-border:#198754;--p3-text:#0a3622;
+--pass-bg:#d1e7dd;--pass-border:#198754;--pass-text:#0a3622;
+--fail-bg:#f8d7da;--fail-border:#dc3545;--fail-text:#721c24;
+--blocked-bg:#fff3cd;--blocked-border:#ffc107;--blocked-text:#664d03;
+--skipped-bg:#e2e3e5;--skipped-border:#adb5bd;--skipped-text:#41464b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;line-height:1.6;color:var(--neutral-900);background:var(--neutral-50);}
+@media print{.no-print{display:none!important;}body{background:white;font-size:11px;}.page-break{page-break-before:always;}table{font-size:10px;}h2{page-break-after:avoid;}tr{page-break-inside:avoid;}.tc-row-notes{display:none!important;}}
+.cover{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:white;padding:60px 40px;display:flex;flex-direction:column;justify-content:center;}
+.cover-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.7;margin-bottom:12px;}
+.cover h1{font-size:32px;font-weight:700;line-height:1.2;margin-bottom:8px;}
+.cover-sub{font-size:16px;opacity:.85;margin-bottom:24px;}
+.cover-meta{display:flex;gap:32px;flex-wrap:wrap;}
+.cover-meta-item label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.6;margin-bottom:2px;}
+.cover-meta-item span{font-size:14px;font-weight:600;}
+.container{max-width:1300px;margin:0 auto;padding:0 40px 80px;}
+.print-bar{background:white;border-bottom:1px solid var(--neutral-200);padding:10px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;gap:8px;}
+.print-bar-title{font-weight:600;color:var(--primary);font-size:13px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all .15s;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-light);}
+.btn-outline{background:white;color:var(--primary);border:1.5px solid var(--primary);}
+.btn-outline:hover{background:var(--neutral-100);}
+.btn-danger{background:#dc3545;color:white;}
+.btn-danger:hover{background:#bb2d3b;}
+.btn-success{background:#198754;color:white;}
+.btn-success:hover{background:#157347;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.toolbar{background:white;border-bottom:1px solid var(--neutral-200);padding:10px 40px;position:sticky;top:43px;z-index:99;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.toolbar-group{display:flex;align-items:center;gap:6px;}
+.toolbar label{font-size:12px;font-weight:600;color:var(--neutral-600);text-transform:uppercase;letter-spacing:.5px;}
+.toolbar select,.toolbar input[type=text]{padding:6px 10px;border:1px solid var(--neutral-300);border-radius:6px;font-size:13px;background:white;}
+.toolbar select:focus,.toolbar input:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 2px rgba(45,90,142,.15);}
+.search-box{flex:1;min-width:200px;}
+.filter-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--neutral-300);background:white;cursor:pointer;transition:all .15s;}
+.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+.filter-btn:hover:not(.active){border-color:var(--primary-light);color:var(--primary);}
+h2{font-size:20px;font-weight:700;color:var(--primary);border-bottom:2px solid var(--neutral-200);padding-bottom:8px;margin:32px 0 16px;}
+h3{font-size:14px;font-weight:700;color:var(--neutral-800);margin:20px 0 10px;}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:24px 0;}
+.stat-card{background:white;border:1px solid var(--neutral-200);border-radius:10px;padding:18px;text-align:center;}
+.stat-card .num{font-size:32px;font-weight:700;color:var(--primary);line-height:1;}
+.stat-card .lbl{font-size:11px;color:var(--neutral-600);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+.progress-bar-container{background:white;border:1px solid var(--neutral-200);border-radius:10px;padding:20px;margin-bottom:24px;}
+.progress-bar-track{height:24px;background:var(--neutral-100);border-radius:12px;overflow:hidden;display:flex;margin-top:10px;}
+.progress-segment{height:100%;transition:width .4s ease;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;overflow:hidden;white-space:nowrap;}
+.progress-segment.s-pass{background:#198754;}
+.progress-segment.s-fail{background:#dc3545;}
+.progress-segment.s-blocked{background:#ffc107;color:#664d03;}
+.progress-segment.s-skipped{background:#adb5bd;}
+.progress-segment.s-pending{background:var(--neutral-200);color:var(--neutral-600);}
+.progress-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--neutral-600);margin-top:6px;}
+.index-table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:24px;}
+.index-table th{background:var(--primary);color:white;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.5px;text-transform:uppercase;}
+.index-table td{padding:9px 14px;border-bottom:1px solid var(--neutral-100);vertical-align:middle;}
+.index-table tr:last-child td{border-bottom:none;}
+.index-table tr:nth-child(even) td{background:var(--neutral-50);}
+.module-badge{display:inline-block;background:var(--primary);color:white;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
+.mini-progress{display:flex;align-items:center;gap:8px;}
+.mini-bar{width:80px;height:8px;background:var(--neutral-200);border-radius:4px;overflow:hidden;}
+.mini-bar-fill{height:100%;background:#198754;transition:width .3s;}
+.mini-text{font-size:11px;color:var(--neutral-600);white-space:nowrap;}
+.tc-table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;}
+.tc-table th{background:var(--neutral-100);color:var(--neutral-700);padding:8px 12px;text-align:left;font-size:11px;letter-spacing:.3px;text-transform:uppercase;border-bottom:2px solid var(--neutral-300);}
+.tc-table td{padding:8px 12px;border-bottom:1px solid var(--neutral-100);vertical-align:middle;font-size:13px;}
+.tc-table tr:last-child td{border-bottom:none;}
+.tc-table tr:hover td{background:var(--neutral-50);}
+.tc-code{font-family:'SFMono-Regular',Consolas,monospace;font-size:11px;color:var(--primary);white-space:nowrap;font-weight:600;}
+.badge{display:inline-block;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;letter-spacing:.3px;cursor:pointer;user-select:none;transition:all .15s;white-space:nowrap;}
+.badge:hover{opacity:.85;transform:scale(1.05);}
+.badge-p1{background:var(--p1-bg);color:var(--p1-text);border:1px solid var(--p1-border);}
+.badge-p2{background:var(--p2-bg);color:var(--p2-text);border:1px solid var(--p2-border);}
+.badge-p3{background:var(--p3-bg);color:var(--p3-text);border:1px solid var(--p3-border);}
+.badge-pending{background:var(--neutral-200);color:var(--neutral-700);border:1px solid var(--neutral-400);}
+.badge-pass{background:var(--pass-bg);color:var(--pass-text);border:1px solid var(--pass-border);}
+.badge-fail{background:var(--fail-bg);color:var(--fail-text);border:1px solid var(--fail-border);}
+.badge-blocked{background:var(--blocked-bg);color:var(--blocked-text);border:1px solid var(--blocked-border);}
+.badge-skipped{background:var(--skipped-bg);color:var(--skipped-text);border:1px solid var(--skipped-border);}
+.row-pass>td{background:#f0f9f3!important;}
+.row-fail>td{background:#fef0f1!important;}
+.row-blocked>td{background:#fff9e6!important;}
+.tc-row-notes{background:var(--neutral-50);border-top:1px dashed var(--neutral-300);}
+.tc-row-notes td{padding:6px 12px;}
+.notes-input{width:100%;padding:4px 8px;border:1px solid var(--neutral-300);border-radius:4px;font-size:12px;background:white;}
+.notes-input:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 2px rgba(45,90,142,.15);}
+.notes-grid{display:grid;grid-template-columns:1fr 120px 120px;gap:8px;align-items:center;}
+.notes-grid label{font-size:11px;color:var(--neutral-600);font-weight:600;}
+.date-input{padding:4px 8px;border:1px solid var(--neutral-300);border-radius:4px;font-size:12px;}
+.module-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0;}
+.module-header h2{margin:0;border:none;padding:0;}
+.module-toggle{font-size:18px;color:var(--neutral-600);transition:transform .2s;}
+.module-toggle.collapsed{transform:rotate(-90deg);}
+.module-content{overflow:hidden;transition:max-height .3s ease;}
+.module-content.collapsed{max-height:0!important;}
+.rtm-table{width:100%;border-collapse:collapse;background:white;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-radius:10px;overflow:hidden;}
+.rtm-table th{background:var(--primary);color:white;padding:8px 10px;text-align:left;font-size:11px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;position:sticky;top:90px;}
+.rtm-table td{padding:6px 10px;border-bottom:1px solid var(--neutral-100);vertical-align:middle;}
+.rtm-table tr:last-child td{border-bottom:none;}
+.rtm-table tr:hover td{background:#f0f4f8;}
+.rtm-group td{background:var(--neutral-100)!important;font-weight:700;color:var(--primary);font-size:12px;padding:4px 10px;}
+.summary-table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.summary-table th{background:var(--primary);color:white;padding:8px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+.summary-table td{padding:8px 14px;border-bottom:1px solid var(--neutral-100);}
+.summary-table tr:last-child td{background:var(--neutral-100);font-weight:700;border-bottom:none;}
+.summary-table td:not(:first-child){text-align:center;}
+.summary-table th:not(:first-child){text-align:center;}
+.priority-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:24px;}
+.priority-card{padding:12px 16px;border-radius:8px;border:1px solid;}
+.priority-card.p1{background:var(--p1-bg);border-color:var(--p1-border);color:var(--p1-text);}
+.priority-card.p2{background:var(--p2-bg);border-color:var(--p2-border);color:var(--p2-text);}
+.priority-card.p3{background:var(--p3-bg);border-color:var(--p3-border);color:var(--p3-text);}
+.priority-card strong{display:block;margin-bottom:2px;font-size:13px;}
+.toc{background:white;border:1px solid var(--neutral-200);border-radius:10px;padding:20px;margin-bottom:24px;}
+.toc h3{margin:0 0 12px;color:var(--primary);}
+.toc ol{padding-left:20px;}
+.toc li{margin-bottom:4px;}
+.toc a{color:var(--primary-light);text-decoration:none;}
+.toc a:hover{text-decoration:underline;}
+.divider{height:1px;background:var(--neutral-200);margin:32px 0;}
+.page-break{page-break-before:always;}
+.tester-bar{background:linear-gradient(135deg,#1a3a5c,#2d5a8e);color:white;padding:16px 40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.tester-bar label{font-size:12px;font-weight:600;opacity:.8;}
+.tester-bar input{padding:6px 12px;border:none;border-radius:6px;font-size:13px;background:rgba(255,255,255,.15);color:white;}
+.tester-bar input::placeholder{color:rgba(255,255,255,.5);}
+.tester-bar input:focus{outline:none;background:rgba(255,255,255,.25);}
+.tester-bar .last-saved{font-size:11px;opacity:.6;margin-left:auto;}
+.hidden{display:none!important;}
+.empty-state{text-align:center;padding:40px;color:var(--neutral-600);font-size:14px;}
+
+/* LOGIN GATE */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a5c 0%,#2d5a8e 60%,#1a3a5c 100%);padding:20px;}
+.login-card{background:white;border-radius:16px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 24px 64px rgba(10,30,50,.35);}
+.login-card .login-logo{width:56px;height:56px;border-radius:14px;background:var(--primary);color:#fff;font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;letter-spacing:1px;}
+.login-card h1{font-size:22px;text-align:center;color:var(--primary);margin-bottom:4px;}
+.login-card .login-sub{text-align:center;font-size:13px;color:var(--neutral-600);margin-bottom:22px;}
+.login-card label{display:block;font-size:12px;font-weight:600;color:var(--neutral-700);margin:12px 0 5px;}
+.login-card input{width:100%;padding:11px 13px;border:1.5px solid var(--neutral-300);border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;}
+.login-card input:focus{border-color:var(--primary);}
+.login-card .btn{width:100%;margin-top:18px;padding:12px;}
+.login-card .login-error{background:#fdecea;color:#b02a37;font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:8px;}
+.login-card .login-hint{font-size:11px;color:var(--neutral-600);text-align:center;margin-top:16px;line-height:1.5;}
+</style>
+
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">PN</div>
+    <h1>Pratihari Nijog</h1>
+    <p class="login-sub">Testing Plan — Dev Team Access</p>
+    <div class="login-error" id="loginError" style="display:none"></div>
+    <label>Work Email</label>
+    <input type="email" id="loginEmail" placeholder="you@pratihari.in" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn btn-primary" id="loginBtn" onclick="handleSignIn()">Sign In</button>
+    <p class="login-hint">Access is restricted to Pratihari Nijog dev team accounts. Test data loads only after sign-in.</p>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="appLoading" style="display:none;text-align:center;padding:80px 20px;color:var(--primary)">
+  <strong>Loading test catalog…</strong>
+</div>
+
+<!-- MAIN APP (hidden until signed in) -->
+<div id="mainApp" style="display:none">
+
+<div class="print-bar no-print">
+  <span class="print-bar-title">Pratihari Nijog — Testing Plan & Traceability Matrix</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">&#11015; Export CSV</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('csvImport').click()">&#11014; Import CSV</button>
+    <input type="file" id="csvImport" accept=".csv" style="display:none" onchange="importCSV(event)">
+    <button class="btn btn-outline btn-sm" onclick="window.print()">&#128438; Print / PDF</button>
+    <button class="btn btn-danger btn-sm" onclick="resetAll()">&#8635; Reset All</button>
+    <button class="btn btn-outline btn-sm" onclick="handleSignOut()">Sign Out</button>
+  </div>
+</div>
+
+<div class="tester-bar no-print">
+  <label>Test Cycle:</label>
+  <input type="text" id="testCycle" placeholder="e.g. Cycle 1 — Sep 2026" oninput="saveTestCycle(this.value)">
+  <span id="whoami" style="font-weight:600;color:var(--primary)"></span>
+  <span class="last-saved" id="lastSaved"></span>
+</div>
+
+<div class="toolbar no-print">
+  <div class="toolbar-group">
+    <label>Filter:</label>
+    <button class="filter-btn active" data-filter="ALL" onclick="setFilter('ALL')">All</button>
+    <button class="filter-btn" data-filter="PENDING" onclick="setFilter('PENDING')">Pending</button>
+    <button class="filter-btn" data-filter="PASS" onclick="setFilter('PASS')">Pass</button>
+    <button class="filter-btn" data-filter="FAIL" onclick="setFilter('FAIL')">Fail</button>
+    <button class="filter-btn" data-filter="BLOCKED" onclick="setFilter('BLOCKED')">Blocked</button>
+    <button class="filter-btn" data-filter="SKIPPED" onclick="setFilter('SKIPPED')">Skipped</button>
+  </div>
+  <div class="toolbar-group">
+    <label>Priority:</label>
+    <select id="priorityFilter" onchange="applyFilters()">
+      <option value="ALL">All Priorities</option>
+      <option value="P1">P1 — Critical</option>
+      <option value="P2">P2 — Important</option>
+      <option value="P3">P3 — Nice to Have</option>
+    </select>
+  </div>
+  <div class="toolbar-group">
+    <label>Module:</label>
+    <select id="moduleFilter" onchange="applyFilters()">
+      <option value="ALL">All Modules</option>
+    </select>
+  </div>
+  <input type="text" class="search-box" id="searchBox" placeholder="Search by ID, title, or description..." oninput="applyFilters()">
+</div>
+
+<div class="cover">
+  <div class="cover-tag">Quality Assurance Document</div>
+  <h1>Pratihari Nijog<br>Testing Plan</h1>
+  <div class="cover-sub">Extensive Test Cases & Requirements Traceability Matrix</div>
+  <div class="cover-meta" id="coverMeta">
+    <div class="cover-meta-item"><label>System</label><span>Pratihari Nijog App + Admin Dashboard</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="overview-grid" id="overviewGrid"></div>
+
+  <div class="progress-bar-container no-print" id="progressContainer">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--primary)">Overall Progress</strong>
+      <span id="overallPercent" style="font-size:20px;font-weight:700;color:var(--primary)">0%</span>
+    </div>
+    <div class="progress-bar-track" id="progressBar"></div>
+    <div class="progress-labels" id="progressLabels"></div>
+  </div>
+
+  <div class="toc no-print">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#module-index">Module Index</a></li>
+      <li><a href="#priority-guide">Priority Guide</a></li>
+      <li><a href="#test-cases">Test Cases by Module</a></li>
+      <li><a href="#rtm">Requirements Traceability Matrix (RTM)</a></li>
+      <li><a href="#summary">Summary Statistics</a></li>
+      <li><a href="#history">Recent Changes</a></li>
+    </ol>
+  </div>
+
+  <h2 id="module-index">Module Index</h2>
+  <table class="index-table" id="moduleIndexTable">
+    <thead><tr><th>Module ID</th><th>Module Name</th><th>Test Cases</th><th>Scope</th><th>Progress</th></tr></thead>
+    <tbody id="moduleIndexBody"></tbody>
+  </table>
+
+  <h2 id="priority-guide">Priority Guide</h2>
+  <div class="priority-legend" id="priorityLegend"></div>
+
+  <h2 id="test-cases">Test Cases by Module</h2>
+  <div id="testCasesContainer"></div>
+
+  <div class="page-break"></div>
+  <h2 id="rtm">Requirements Traceability Matrix (RTM)</h2>
+  <p style="margin-bottom:12px;color:var(--neutral-600)">Master matrix linking every test case to its module, feature, priority, and current status. Click any status badge to update it.</p>
+  <table class="rtm-table" id="rtmTable">
+    <thead><tr><th>Test ID</th><th>Module</th><th>Feature</th><th>Description</th><th>P</th><th>Status</th></tr></thead>
+    <tbody id="rtmBody"></tbody>
+  </table>
+
+  <div class="page-break"></div>
+  <h2 id="summary">Summary Statistics</h2>
+  <table class="summary-table" id="summaryTable">
+    <thead><tr><th>Module</th><th>Total</th><th>P1</th><th>P2</th><th>P3</th><th>Pass</th><th>Fail</th><th>Blocked</th><th>Pending</th></tr></thead>
+    <tbody id="summaryBody"></tbody>
+  </table>
+
+  <div class="page-break"></div>
+  <h2 id="history">Recent Changes</h2>
+  <p style="margin-bottom:12px;color:var(--neutral-600)">Audit trail of the latest status changes across all testers.</p>
+  <table class="summary-table" id="historyTable">
+    <thead><tr><th>When</th><th>Test ID</th><th>From</th><th>To</th><th>Changed By</th></tr></thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+
+  <div id="testersPanel" style="margin-top:32px"></div>
+
+  <div style="margin-top:32px;padding:20px;background:white;border-radius:10px;border:1px solid var(--neutral-200);color:var(--neutral-600);font-size:12px;text-align:center;">
+    Pratihari Nijog — Testing Plan v2.0 &nbsp;|&nbsp; Database-backed QA tracking &nbsp;|&nbsp; Results shared across all devices
+  </div>
+</div>
+
+</div><!-- /mainApp -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="testing-plan.js?v=20261009-1"></script>
+</body>
+</html>
